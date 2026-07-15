@@ -1,0 +1,4 @@
+node_modules/
+dist/
+.lmstudio/
+*.log

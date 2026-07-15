@@ -1,0 +1,27 @@
+{
+  "name": "lms-plugin-context-compaction",
+  "version": "0.1.0",
+  "description": "An LM Studio plugin that compacts long conversations by summarizing older turns into a structured system message.",
+  "keywords": [
+    "lmstudio",
+    "lmstudio-plugin",
+    "context-compaction",
+    "summarization"
+  ],
+  "main": "index.js",
+  "scripts": {
+    "dev": "lms dev",
+    "push": "lms push",
+    "typecheck": "tsc --noEmit"
+  },
+  "author": "Neul (https://github.com/neulsina)",
+  "license": "MIT",
+  "dependencies": {
+    "@lmstudio/sdk": "1.4.0",
+    "zod": "3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.8",
+    "typescript": "^5.8.3"
+  }
+}
