@@ -1,9 +1,11 @@
-# context-compaction
+# ChatComp
 
-**An LM Studio plugin that lets long chats keep going without forgetting what you said.**
+**A plugin for LM Studio that lets long chats keep going without forgetting what you said.**
 
-[![LM Studio](https://img.shields.io/badge/LM%20Studio-plugin-blue)](https://lmstudio.ai)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+> An independent, unofficial project. Not affiliated with, sponsored by, or endorsed by
+> Element Labs, Inc.
 
 ---
 
@@ -45,14 +47,17 @@ You need **LM Studio** with at least one LLM downloaded. You do **not** need Nod
 ships its own runtime and `lms dev` uses it.
 
 ```bash
-git clone https://github.com/neulsina/lmstudio-context-compaction.git
-cd lmstudio-context-compaction
+git clone https://github.com/neulsina/ChatComp.git
+cd ChatComp
 lms dev --install
 ```
 
 That installs the plugin permanently. To hack on it instead, run `lms dev` — it rebuilds on every
 save, but the plugin only exists while that command is running and shows up as
 `dev/local/context-compaction`.
+
+> The plugin registers under the name **context-compaction** — that is what you will look for in
+> the model dropdown, not "ChatComp".
 
 > `lms` comes with LM Studio. If it is not on your PATH, it lives in `~/.lmstudio/bin`.
 
@@ -169,4 +174,16 @@ and run `lms push`.
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
+
+`src/generator.ts` follows the shape of the official `lmstudio/remote-lmstudio` example plugin
+(ISC), which is where the token-streaming and tool-call relay wiring comes from.
+
+Dependencies: [`@lmstudio/sdk`](https://github.com/lmstudio-ai/lmstudio-js) (Apache-2.0) and
+[`zod`](https://github.com/colinhacks/zod) (MIT).
+
+## Trademarks
+
+LM Studio and Element Labs are trademarks of Element Labs, Inc. This project is an independent work
+and is not affiliated with, sponsored by, or endorsed by Element Labs, Inc. References to LM Studio
+describe what this plugin is compatible with.

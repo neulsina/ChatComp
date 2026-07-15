@@ -1,12 +1,12 @@
 {
-  "name": "lms-plugin-context-compaction",
+  "name": "chatcomp",
   "version": "0.1.0",
-  "description": "An LM Studio plugin that compacts long conversations by summarizing older turns into a structured system message.",
+  "description": "A plugin that compacts long conversations by summarizing older turns into a structured system message.",
   "keywords": [
-    "lmstudio",
-    "lmstudio-plugin",
     "context-compaction",
-    "summarization"
+    "summarization",
+    "llm",
+    "plugin"
   ],
   "main": "index.js",
   "scripts": {
