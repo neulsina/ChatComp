@@ -38,6 +38,9 @@ interface CacheEntry {
 }
 const summaryCache = new Map<string, CacheEntry>();
 
+/** The plugin process outlives any one chat, so the cache needs a ceiling. */
+const MAX_CACHED_CONVERSATIONS = 32;
+
 /**
  * Advancing the compaction boundary one message at a time would invalidate the cache every turn.
  * Quantizing it means the boundary only moves every BLOCK_SIZE messages, so the turns in between
@@ -116,7 +119,9 @@ export async function compact(
   }
 
   const messages = chat.getMessagesArray();
-  const leadingSystem = messages.filter(m => m.isSystemPrompt());
+  // System messages are pulled out wherever they sit and put back at the front, since that is
+  // where a system prompt belongs and LM Studio does not put them anywhere else in practice.
+  const systemMessages = messages.filter(m => m.isSystemPrompt());
   const body = messages.filter(m => !m.isSystemPrompt());
 
   const boundary =
@@ -132,18 +137,26 @@ export async function compact(
   const fingerprint = fingerprintOf(toSummarize);
   const cached = summaryCache.get(cacheKey);
 
+  // The key is only the opening message, so two chats that start alike land on the same entry. An
+  // entry is only usable if its fingerprint still matches this conversation's prefix of the same
+  // length — without that check, extending would build this chat's summary on another chat's.
+  const usable =
+    cached !== undefined &&
+    cached.covered <= boundary &&
+    fingerprintOf(toSummarize.slice(0, cached.covered)) === cached.fingerprint;
+
   let summary: ConversationSummary;
   let action: CompactResult["action"];
 
-  if (cached !== undefined && cached.covered === boundary && cached.fingerprint === fingerprint) {
-    summary = cached.summary;
+  if (usable && cached!.covered === boundary) {
+    summary = cached!.summary;
     action = "reused-summary";
   } else {
     try {
       // When the boundary has only advanced, feed the previous summary plus the newly-covered
       // messages instead of re-reading the whole history. Re-summarizing a summary loses detail
       // each generation; updating a structured one appends to it instead.
-      const canExtend = cached !== undefined && cached.covered < boundary;
+      const canExtend = usable && cached!.covered < boundary;
       summary = await summarize(
         model,
         canExtend ? toSummarize.slice(cached!.covered) : toSummarize,
@@ -163,11 +176,16 @@ export async function compact(
         detail: error instanceof Error ? error.message : String(error),
       };
     }
+    if (!summaryCache.has(cacheKey) && summaryCache.size >= MAX_CACHED_CONVERSATIONS) {
+      // A Map iterates in insertion order, so the first key is the least recently added.
+      const oldest = summaryCache.keys().next().value;
+      if (oldest !== undefined) summaryCache.delete(oldest);
+    }
     summaryCache.set(cacheKey, { covered: boundary, fingerprint, summary });
   }
 
   const compacted = Chat.empty();
-  for (const message of leadingSystem) {
+  for (const message of systemMessages) {
     compacted.append(message);
   }
   compacted.append("system", renderSummary(summary));

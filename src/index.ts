@@ -11,7 +11,9 @@ declare const process: { env: Record<string, string | undefined> };
  */
 async function listModelOptions(): Promise<Array<ModelOption>> {
   try {
-    const client = new LMStudioClient({
+    // Disposed once the list is read: this client exists only for this call, and the generator
+    // uses the one the host hands it instead.
+    await using client = new LMStudioClient({
       clientIdentifier: process.env.LMS_PLUGIN_CLIENT_IDENTIFIER,
       clientPasskey: process.env.LMS_PLUGIN_CLIENT_PASSKEY,
       baseUrl: process.env.LMS_PLUGIN_BASE_URL,
